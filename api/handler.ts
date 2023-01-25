@@ -7,6 +7,8 @@ export default function handler(request : any, response : any) {
   console.log("[BOT INFO]: ");
   console.log(bot);
 
+  bot.sendMessage(request.body.message.chat.id, '[From handler]: HELLO WORLD');
+
   response.status(200).json({
     body: request.body,
     query: request.query,
