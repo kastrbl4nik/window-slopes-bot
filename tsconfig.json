@@ -4,6 +4,6 @@
 		"module": "CommonJS",
 		"outDir": "dist",
 	},
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "api/handler.ts"],
 	"exclude": ["node_modules"]
 }
