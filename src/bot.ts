@@ -9,6 +9,6 @@ bot.on('/start', msg => {
 if(process.env.NODE_ENV === "debug")
     bot.start();
 else
-    bot.setWebhook(`https://${process.env.VERCEL_ENV}/api/handler`);
+    bot.setWebhook(`https://${process.env.VERCEL_ENV}/api/handler`).catch((err) => console.log(err));
 
 export default bot;
