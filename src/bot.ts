@@ -6,6 +6,4 @@ bot.on('/start', msg => {
     return bot.sendMessage(msg.chat.id, "HELLO WORLD");
 });
 
-bot.start();
-
 export default bot;
