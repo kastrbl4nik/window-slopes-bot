@@ -3,7 +3,7 @@ import TeleBot from 'telebot';
 const bot = new TeleBot({
     token: process.env.TELEGRAM_TOKEN as string,
     webhook: {
-        url: `https://${process.env.VERCEL_ENV}/api/handler`,
+        url: `https://${process.env.VERCEL_URL}/api/handler`,
     }
 });
 
