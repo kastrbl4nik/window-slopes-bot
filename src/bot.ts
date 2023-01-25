@@ -9,7 +9,7 @@ bot.on('/start', msg => {
 if(process.env.NODE_ENV === "debug")
     bot.start();
 
-export default function handler(request : any, response: any) {
+module.exports = async(request : any, response: any) => {
     response.status(200).json({
         body: request.body,
         query: request.query,
