@@ -2,9 +2,13 @@ import bot from '../src/bot';
 
 export default function handler(request : any, response : any) {
   bot.receiveUpdates([request.body]);
-  console.log("[REQUEST BODY]: " + request.body);
+  console.log("[REQUEST BODY]: ");
+  console.log(request.body);
+  console.log("[WEBHOOK INFO]: ");
   bot.getWebhookInfo().then((data) => {
-    console.log("[WEBHOOK INFO]: " + data);
+    console.log(data);
+  }).catch((error) => {
+    console.log(error);
   })
 
   response.status(200).json({
