@@ -1,6 +1,6 @@
 {
 	"functions": {
-		"api/**": {
+		"dist/api/**": {
 		"includeFiles": "node_modules/telebot/plugins/**"
 		}
 	},
