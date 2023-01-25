@@ -8,3 +8,5 @@ bot.on('/start', msg => {
 
 if(process.env.NODE_ENV === "debug")
     bot.start();
+
+export default bot;
