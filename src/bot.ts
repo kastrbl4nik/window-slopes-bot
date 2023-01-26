@@ -15,7 +15,7 @@ bot.on('/start', async msg => {
     ], {resize: true});
     const users = (await collections.users?.find().toArray()) as User[];
     let usernames = '';
-    users.forEach(user => {
+    users?.forEach(user => {
         usernames += user.username + '\n';
     });
     bot.sendMessage(
