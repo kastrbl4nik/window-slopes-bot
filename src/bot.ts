@@ -20,7 +20,7 @@ bot.on('/start', async msg => {
     });
     bot.sendMessage(
         msg.chat.id,
-        `Hello, ${msg.from.first_name}! Currently there're ${users.length} in the database:\n${usernames}`,
+        `Hello, ${msg.from.first_name}! Currently there're ${users?.length} in the database:\n${usernames}`,
         {replyMarkup});
 });
 
