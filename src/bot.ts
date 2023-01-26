@@ -20,13 +20,11 @@ bot.on('/start', async msg => {
     });
     bot.sendMessage(
         msg.chat.id,
-        `Hello, ${msg.from.first_name}! Currently there're ${users?.length} in the database:\n${usernames}`,
+        `Hello, ${msg.from.first_name}! Currently there're ${users?.length} users in the database:\n${usernames}`,
         {replyMarkup});
 });
 
 if(process.env.VERCEL_ENV != 'production')
     bot.start(); // Use long polling instead of webhook
-else 
-    bot.setWebhook('https://window-slopes-bot.vercel.app/api/handler'); // Use webhook
 
 export default bot;
