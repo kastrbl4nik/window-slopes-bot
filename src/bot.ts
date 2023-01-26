@@ -1,18 +1,27 @@
 import TeleBot from 'telebot';
-import { MongoClient } from 'mongodb';
+import { collections, connectToDatabase } from "./services/database.service";
+import User from "./models/user";
 
 const bot = new TeleBot(process.env.TELEGRAM_TOKEN as string);
-const client = new MongoClient(process.env.MONGODB as string);
-
-client.connect().catch(err => console.error(err));
-const Database = client.db('window-slopes-db');
+connectToDatabase().catch((error: Error) => {
+    console.error("Database connection failed", error);
+    process.exit();
+});
 
 bot.on('/start', async msg => {
     let replyMarkup = bot.keyboard([
         ['/help', '/start'],
         ['/orders', '/about'],
     ], {resize: true});
-    return bot.sendMessage(msg.chat.id, `Hello, ${msg.from.first_name}!`, {replyMarkup});
+    const users = (await collections.users?.find().toArray()) as User[];
+    let usernames = '';
+    users.forEach(user => {
+        usernames += user.username + '\n';
+    });
+    bot.sendMessage(
+        msg.chat.id,
+        `Hello, ${msg.from.first_name}! Currently there're ${users.length} in the database:\n${usernames}`,
+        {replyMarkup});
 });
 
 if(process.env.VERCEL_ENV != 'production')
