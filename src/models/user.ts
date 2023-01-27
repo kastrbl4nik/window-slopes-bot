@@ -1,9 +1,10 @@
 import { ObjectId, Document, WithId } from "mongodb";
 
-export default class User implements WithId<Document> {
+export default class User {
     constructor(
-        public username: string,
-        public firstName: number,
-        public lastName: string,
-        public _id: ObjectId) {}
+        public _id: ObjectId,
+        public username?: string,
+        public firstName?: string,
+        public lastName?: string,
+    ) {}
 }
