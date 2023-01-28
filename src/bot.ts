@@ -60,8 +60,6 @@ bot.onText(/\/remove/, async msg => {
     await collections.users?.deleteOne(
         {id: msg.from?.id}
     ).then(result => {
-        console.debug(result);
-        console.debug(msg.from?.id);
         bot.sendMessage(
             msg.chat.id,
             `You've been deleted from a database!`);
