@@ -69,7 +69,7 @@ bot.onText(/\/remove/, async msg => {
 })
 
 bot.on('callback_query', async query => {
-    console.debug(query);
+    bot.deleteMessage(query.from.id, query.message!.message_id.toString());
     if(query.data == 'false')
         return bot.sendMessage(query.from.id, 'Deletion was canceled');
 
@@ -80,8 +80,6 @@ bot.on('callback_query', async query => {
             query.from.id,
             `You've been deleted from a database!`);
     });
-
-    bot.deleteMessage(query.from.id, query.message!.message_id.toString());
 })
 
 export default bot;
