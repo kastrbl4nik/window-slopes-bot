@@ -57,13 +57,31 @@ bot.onText(/\/add/, async msg => {
 })
 
 bot.onText(/\/remove/, async msg => {
+    const options : TelegramBot.SendMessageOptions = {
+        reply_markup: {
+            inline_keyboard: [[
+                {text: 'Yes', callback_data: 'true'},
+                {text: 'No', callback_data: 'false'}
+            ]]
+        }
+    }
+    bot.sendMessage(msg.chat.id, 'Are you sure?', options);
+})
+
+bot.on('callback_query', async query => {
+    console.debug(query);
+    if(query.data == 'false')
+        return bot.sendMessage(query.from.id, 'Deletion was canceled');
+
     await collections.users?.deleteOne(
-        {id: msg.from?.id}
+        {id: query.from?.id}
     ).then(result => {
         bot.sendMessage(
-            msg.chat.id,
+            query.from.id,
             `You've been deleted from a database!`);
     });
+
+    bot.deleteMessage(query.from.id, query.message!.message_id.toString());
 })
 
 export default bot;
