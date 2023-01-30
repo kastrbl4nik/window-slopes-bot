@@ -1,13 +1,10 @@
 import TelegramBot from "node-telegram-bot-api";
-import { collections, connectToDatabase } from "./services/database.service";
-import { ObjectId } from "mongodb";
-import User from "./models/user";
+import { User, IUser } from "./models/user";
+import { connect } from 'mongoose';
+import { Answer } from "./models/answer";
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN as string, {polling: true});
-connectToDatabase().catch(err => {
-    console.error("Database connection failed", err);
-    process.exit();
-});
+connect(process.env.MONGODB_CONNECTION_STRING as string);
 
 bot.setMyCommands([
     {command: '/start', description: 'Start the bot'},
@@ -31,8 +28,28 @@ bot.onText(/\/start/, msg => {
         options)
 })
 
+bot.onText(/\/answer/, async msg => {
+	const answer = new Answer({
+    	tag: 'answer_tag',
+		text: new Map([
+			['ru', 'Ответ'],
+			['en', 'Answer']
+		])
+   	})
+	await answer.save();
+
+	bot.sendMessage(msg.chat.id, 'Answer added');
+	
+	await Answer.findOne({tag: 'answer_tag'}).then(a => {
+		bot.sendMessage(
+			msg.chat.id,
+			a?.text.get(msg.from?.language_code ?? 'ru') as string
+		)
+	})
+})
+
 bot.onText(/\/status/, async msg => {
-    await collections.users?.find().toArray().then(users => {
+    User.find().then(users => {
         let usernames = '';
         for(const user of users) {
             usernames += user.username + '\n';
@@ -40,20 +57,15 @@ bot.onText(/\/status/, async msg => {
         bot.sendMessage(
             msg.chat.id,
             `Currently there're ${users?.length} users in the database:\n${usernames}`,);
-    });
+    })
 });
 
 bot.onText(/\/add/, async msg => {
-    const user = msg.from as User;
-    await collections.users?.updateOne(
-        {_id: new ObjectId(msg.from!.id)},
-        {$set: user},
-        {upsert: true}
-    ).then(result => {
-        bot.sendMessage(
-            msg.chat.id,
-            `You've been added to a database!`);
-    });
+    const user = new User(msg.from);
+    await user.save()
+    bot.sendMessage(
+        msg.chat.id,
+        `You've been added to a database!`);
 })
 
 bot.onText(/\/remove/, async msg => {
@@ -73,13 +85,10 @@ bot.on('callback_query', async query => {
     if(query.data == 'false')
         return bot.sendMessage(query.from.id, 'Deletion was canceled');
 
-    await collections.users?.deleteOne(
-        {id: query.from?.id}
-    ).then(result => {
-        bot.sendMessage(
-            query.from.id,
-            `You've been deleted from a database!`);
-    });
+    await User.deleteOne(query.from);
+    bot.sendMessage(
+        query.from.id,
+        `You've been deleted from a database!`);
 })
 
 export default bot;

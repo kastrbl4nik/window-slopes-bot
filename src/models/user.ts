@@ -1,14 +1,18 @@
-import { ObjectId, Document, WithId } from "mongodb";
 import TelegramBot from "node-telegram-bot-api";
+import { Schema, model } from 'mongoose';
 
-export default class User implements TelegramBot.User {
-    constructor(
-        public id: number,
-        public is_bot: boolean,
-        public first_name: string,
-        public last_name?: string | undefined,
-        public username?: string | undefined,
-        public language_code?: string | undefined,
-        public _id?: ObjectId
-    ) {}
+export interface IUser extends TelegramBot.User{
+    phone_number?: number | undefined
 }
+
+const userSchema = new Schema<IUser>({
+    id: {type: Number, required: true},
+    is_bot: {type: Boolean, required: true},
+    first_name: {type: String, required: true},
+    last_name: {type: String, required: false},
+    username: {type: String, required: false},
+    language_code: {type: String, required: false},
+    phone_number:  {type: String, required: false},
+})
+
+export const User = model<IUser>('User', userSchema);
