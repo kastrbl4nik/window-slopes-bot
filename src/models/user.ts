@@ -1,8 +1,10 @@
 import TelegramBot from "node-telegram-bot-api";
+import { IOrder } from "./order";
 import { Schema, model } from 'mongoose';
 
 export interface IUser extends TelegramBot.User{
-    phone_number?: number | undefined
+    phone_number?: number | undefined;
+    orders: IOrder[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -13,6 +15,7 @@ const userSchema = new Schema<IUser>({
     username: {type: String, required: false},
     language_code: {type: String, required: false},
     phone_number:  {type: String, required: false},
+    orders: [{type: Schema.Types.ObjectId, ref: 'Order'}],
 })
 
 export const User = model<IUser>('User', userSchema);

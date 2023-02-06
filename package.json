@@ -2,11 +2,11 @@
   "name": "window-slopes-bot",
   "version": "1.0.0",
   "description": "Telegram Bot that allows people to place orders for window slopes.",
-  "main": "dist/bot.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/bot.js",
-    "dev": "env-cmd ts-node-dev src/bot.ts",
+    "start": "node dist/main.js",
+    "dev": "env-cmd ts-node-dev src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
