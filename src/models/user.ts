@@ -4,8 +4,9 @@ import { IOrder, Order } from "./order";
 
 export interface IUser extends TelegramBot.User{
     _id?: Types.ObjectId,
-    phone_number?: number | undefined,
+    phone_number?: string | undefined,
     orders: Types.ObjectId[],
+    is_premium?: boolean,
 }
 
 const userSchema = new Schema<IUser>({
@@ -17,6 +18,7 @@ const userSchema = new Schema<IUser>({
     language_code: {type: String, required: false},
     phone_number:  {type: String, required: false},
     orders: [{type: Schema.Types.ObjectId, ref: 'Order'}],
+    is_premium: {type: Boolean, required: false},
 }, { versionKey: false })
 
 userSchema.pre('remove', async function (this: IUser, next) {
