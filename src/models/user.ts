@@ -1,10 +1,11 @@
 import TelegramBot from "node-telegram-bot-api";
-import { IOrder } from "./order";
-import { Schema, model } from 'mongoose';
+import { Schema, Types, model } from 'mongoose';
+import { IOrder, Order } from "./order";
 
 export interface IUser extends TelegramBot.User{
-    phone_number?: number | undefined;
-    orders: IOrder[];
+    _id?: Types.ObjectId,
+    phone_number?: number | undefined,
+    orders: Types.ObjectId[],
 }
 
 const userSchema = new Schema<IUser>({
@@ -16,6 +17,12 @@ const userSchema = new Schema<IUser>({
     language_code: {type: String, required: false},
     phone_number:  {type: String, required: false},
     orders: [{type: Schema.Types.ObjectId, ref: 'Order'}],
-})
+}, { versionKey: false })
+
+userSchema.pre('remove', async function (this: IUser, next) {
+    const user = this;
+    await Order.deleteMany({ user: user._id });
+    next();
+});
 
 export const User = model<IUser>('User', userSchema);
