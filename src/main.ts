@@ -89,7 +89,6 @@ bot.on('callback_query', async query => {
 			let input = await ask(query.from.id, 'Enter your phone number') ?? '';
 			input = input.replace(/\s+|-|\+375/g, "");
 			const pattern = /^\d{9}$/;
-			console.log(input);
 
 			if(!pattern.test(input)) {
 				bot.sendMessage(query.from.id, 'Invalid number')
@@ -99,15 +98,6 @@ bot.on('callback_query', async query => {
 			user.phone_number = '+375' + input;
 			user.save();
 			bot.sendMessage(query.from.id, 'Phone number updated');
-		}
-		case 'enterFirstName' : {
-
-		}
-		case 'enterLastName' : {
-
-		}
-		case 'enterLanguage' : {
-
 		}
 	}
 

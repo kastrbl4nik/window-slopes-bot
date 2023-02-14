@@ -3,31 +3,42 @@ import { IUser, User } from "../models/user";
 import View from "./view";
 
 export class AccountFormView implements View {
-    private message?: TelegramBot.Message
+    private message?: TelegramBot.Message;
     constructor(
         private bot: TelegramBot, 
         private user: IUser,
         public chatId: TelegramBot.ChatId,
     ) {}
     public async invoke() {
-        const text = `Your Account:
-        First Name:\t ${this.user.first_name ?? '❌'}
-        Last Name:\t ${this.user.last_name ?? '❌'}
-        Phone Number: \`${this.user.phone_number ?? '❌'}\`
-        Language: ${this.user.language_code ?? '❌'}`;
+        const flags = new Map<string, string>([
+            ['ru', '🇷🇺'],
+            ['en', '🇬🇧'],
+            ['by', '🇧🇾'],
+            ['ua', '🇺🇦'],
+            ['pl', '🇵🇱'],
+        ]);
+        let flag;
+        if(this.user.language_code)
+            flag = flags.get(this.user.language_code) ?? this.user.language_code;
+        const text = 
+        '*Your Account*:\n\n' +
+        '▫️ *First Name*: ' + (this.user.first_name ?? '🚫') + '\n' +
+        '▫️ *Last Name*: ' + (this.user.last_name ?? '🚫') + '\n' +
+        '▫️ *Phone Number*: \`' + (this.user.phone_number ?? '🚫') + '\`\n' +
+        '▫️ *Language*: ' + (flag ?? '🚫') + '\n';
         const options: TelegramBot.SendMessageOptions = {
             parse_mode: 'MarkdownV2',
             reply_markup: {
                 inline_keyboard: [[
-                    {text: 'First Name', callback_data: JSON.stringify({type: 'enterFirstName'})},
-                    {text: 'Last Name', callback_data: JSON.stringify({type: 'enterLastName'})},
+                    {text: 'First name ✏️', callback_data: JSON.stringify({type: 'enterFirstName'})},
+                    {text: 'Last name ✏️', callback_data: JSON.stringify({type: 'enterLastName'})},
                 ],
                 [
-                    {text: 'Phone number', callback_data: JSON.stringify({type: 'enterPhoneNumber'})},
-                    {text: 'Language', callback_data: JSON.stringify({type: 'enterLanguage'})},
+                    {text: 'Phone number ✏️', callback_data: JSON.stringify({type: 'enterPhoneNumber'})},
+                    {text: 'Language ✏️', callback_data: JSON.stringify({type: 'enterLanguage'})},
                 ], 
                 [
-                    {text: 'Return', callback_data: JSON.stringify({type: 'showMainMenu'})},
+                    {text: 'Return ↩️', callback_data: JSON.stringify({type: 'showMainMenu'})},
                 ]]
             }
         }

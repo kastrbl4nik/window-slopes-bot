@@ -11,18 +11,22 @@ export class OrderFormView implements View {
         public chatId: TelegramBot.ChatId,
     ) {}
     public async invoke() {
-        const text = `Please enter the missing values in a form below:
-        Width:\t ${this.order.width ?? '❌'}
-        Height:\t ${this.order.height ?? '❌'}`;
-        const options = {
+        const text = 
+        '*Your order was created*\\!\n\n' +
+        '▫️ *Id*: \`'+ (this.order._id ?? '🚫') + '\`\n' +
+        '▫️ *Width*: ' + (this.order.width ?? '🚫') + '\n' +
+        '▫️ *Height*: ' + (this.order.height ?? '🚫') + '\n';
+        
+        const options: TelegramBot.SendMessageOptions = {
+            parse_mode: 'MarkdownV2',
             reply_markup: {
                 inline_keyboard: [[
-                    {text: 'Enter width', callback_data: 'enterWidth'},
-                    {text: 'Enter height', callback_data: 'enterHeight'},
+                    {text: 'Width ✏️', callback_data: 'enterWidth'},
+                    {text: 'Height ✏️', callback_data: 'enterHeight'},
                 ],
                 [
                     {text: 'Confirm ✅', callback_data: 'confirmOrder'},
-                    {text: 'Cancel ❌', callback_data: JSON.stringify({type: 'cancelOrder', orderId: this.order._id})},
+                    {text: 'Cancel 🗑', callback_data: JSON.stringify({type: 'cancelOrder', orderId: this.order._id})},
                 ]]
             }
         }
