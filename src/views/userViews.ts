@@ -1,6 +1,6 @@
 import TelegramBot from "node-telegram-bot-api";
 import { IUser, User } from "../models/user";
-import View from "./view";
+import { View } from "../models/view";
 
 export class AccountFormView extends View {
 

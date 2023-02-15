@@ -1,5 +1,5 @@
 import TelegramBot from "node-telegram-bot-api";
-import View from "./view";
+import { View } from "../models/view";
 
 export class MainMenuView extends View {
     constructor(chatId: TelegramBot.ChatId, bot: TelegramBot) {

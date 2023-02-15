@@ -1,7 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import { IOrder, Order } from "../models/order";
 import { User } from "../models/user";
-import View from "./view";
+import { View } from "../models/view";
 
 export class OrderFormView extends View {
     private order: IOrder;
