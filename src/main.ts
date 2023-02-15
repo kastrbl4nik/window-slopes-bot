@@ -4,7 +4,7 @@ import TelegramBot from "node-telegram-bot-api";
 import { IOrder, Order } from "./models/order";
 import { IUser, User } from "./models/user";
 import { OrderFormView, OrderStatusView } from "./views/orderViews";
-import View from "./views/view";
+import IView from "./views/view";
 import { MainMenuView } from "./views/menuViews";
 import { AccountFormView } from "./views/userViews";
 
@@ -36,12 +36,11 @@ async function ask(chatId: TelegramBot.ChatId, question: string): Promise<string
 bot.onText(/\/start/, async msg => {
 	User.updateOne(msg.from, {$set: msg.from}, {upsert: true}).catch(err => console.log(err));
 	if(!msg.from) return;
-	const view: View = new MainMenuView(bot, msg.from.id);
+	const view: IView = new MainMenuView(msg.from.id, bot);
 	view.invoke();
 });
 
 const views = new Map<string, OrderFormView>();
-
 
 bot.on('callback_query', async query => {
 	if(!query.data)
@@ -53,7 +52,7 @@ bot.on('callback_query', async query => {
 			const order = new Order({user: user._id!});
 			order.save();
 
-			const view = new OrderFormView(bot, order, query.from.id);
+			const view = new OrderFormView(query.from.id, bot, order);
 			views.set(order._id.toString(), view);
 			view.invoke();
 
@@ -68,19 +67,19 @@ bot.on('callback_query', async query => {
 		case 'orderStatus' : {
 			const order = await Order.findOne(); //TODO: filter last order
 			if (!order) return;
-	 		const view = new OrderStatusView(bot, order, query.from.id); 
+	 		const view = new OrderStatusView(query.from.id,bot, order); 
 			view.invoke(); 
 
 			break; 
 		}
 		case 'showMainMenu' : {
-			new MainMenuView(bot, query.from.id).invoke();
+			new MainMenuView(query.from.id, bot).invoke();
 
 			break;
 		}
 		case 'showAccount' : {
 			const user = await User.findOne({id: query.from.id}) ?? await new User(query.from).save(); 
-			new AccountFormView(bot, user, query.from.id).invoke(); 
+			new AccountFormView(query.from.id, bot, user).invoke(); 
 
 			break; 
 		}
