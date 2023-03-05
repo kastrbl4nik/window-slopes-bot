@@ -93,13 +93,53 @@ bot.on('callback_query', async query => {
 			const pattern = /^\d{9}$/;
 
 			if(!pattern.test(input)) {
-				bot.sendMessage(query.from.id, 'Invalid number')
+				bot.answerCallbackQuery(query.id, {text: 'Invalid phone number'});
 				return;
 			}
 
 			user.phone_number = '+375' + input;
 			user.save();
-			bot.sendMessage(query.from.id, 'Phone number updated');
+
+			if(!query.message) return;
+
+			View.clearChat(query.from.id, bot);
+			new AccountFormView(query.from.id, bot, user).invoke();
+
+			bot.answerCallbackQuery(query.id, {text: 'Phone number updated'});
+
+			break; 
+		}
+
+		case 'enterFirstName' : { 
+			const user = await User.findOne({id: query.from.id}) ?? await new User(query.from).save(); 
+			let input = await ask(query.from.id, 'Enter your first name') ?? '';
+
+			user.first_name = input;
+			user.save();
+
+			if(!query.message) return;
+
+			View.clearChat(query.from.id, bot);
+			new AccountFormView(query.from.id, bot, user).invoke();
+			bot.answerCallbackQuery(query.id, {text: 'First name updated'});
+
+			break; 
+		}
+
+		case 'enterLastName' : { 
+			const user = await User.findOne({id: query.from.id}) ?? await new User(query.from).save(); 
+			let input = await ask(query.from.id, 'Enter your last name') ?? '';
+
+			user.last_name = input;
+			user.save();
+
+			if(!query.message) return;
+
+			View.clearChat(query.from.id, bot);
+			new AccountFormView(query.from.id, bot, user).invoke();
+			bot.answerCallbackQuery(query.id, {text: 'Last name updated'});
+
+			break; 
 		}
 	}
 
