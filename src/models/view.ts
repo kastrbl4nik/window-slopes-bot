@@ -36,11 +36,6 @@ export class View implements IView {
             view.message_id = viewData.message_id;
             view.destroy();
         }
-        /*for(let viewData of viewsData) {
-            const viewDataData = await View.getView(viewData.chat_id, viewData.message_id!);
-            if(!viewDataData.chat_id) 
-            this.getView(viewDataData?.chat_id, viewDataData?.message_id).destroy();
-        }*/
     }
 
     public invoke = async () => {
@@ -51,7 +46,11 @@ export class View implements IView {
 
     public destroy = async () => {
         if(!this.message_id) return;
-        await this.bot.deleteMessage(this.chat_id, this.message_id.toString());
+        try {
+            await this.bot.deleteMessage(this.chat_id, this.message_id.toString());
+        } catch (e) {
+            console.error(e);
+        }
         const view = await View.getView(this.chat_id, this.message_id);
         view?.delete();
     }
