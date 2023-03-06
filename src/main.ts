@@ -3,10 +3,10 @@ import mongoose, { Types } from "mongoose";
 import TelegramBot from "node-telegram-bot-api";
 import { IOrder, Order } from "./models/order";
 import { IUser, User } from "./models/user";
-import { OrderFormView, OrderStatusView } from "./views/orderViews";
+import { View } from "./models/view";
 import { MainMenuView } from "./views/menuViews";
+import { OrderFormView, OrderStatusView } from "./views/orderViews";
 import { AccountFormView } from "./views/userViews";
-import { IView, View, ViewModel } from "./models/view";
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN as string, {polling: true});
 
@@ -35,9 +35,7 @@ async function ask(chatId: TelegramBot.ChatId, question: string): Promise<string
 
 bot.onText(/\/start/, async msg => {
 	User.updateOne(msg.from, {$set: msg.from}, {upsert: true}).catch(err => console.log(err));
-	if(!msg.from) return;
-	const view = new MainMenuView(msg.from.id, bot);
-	view.invoke();
+	new MainMenuView(msg.chat.id).invoke();
 });
 
 
@@ -50,11 +48,8 @@ bot.on('callback_query', async query => {
 			const user = await User.findOne({id: query.from.id}) ?? await new User(query.from).save();
 			const order = new Order({user: user._id!});
 			order.save();
-			
-			View.clearChat(query.from.id, bot);
-			const view = new OrderFormView(query.from.id, bot, order);
-			view.invoke();
-
+			//View.clearChat(query.from.id);
+			new OrderFormView(query.from.id, order).invoke();
 			break;
 		}
 		case 'cancelOrder': {
@@ -66,23 +61,22 @@ bot.on('callback_query', async query => {
 		case 'orderStatus' : {
 			const order = await Order.findOne(); //TODO: filter last order
 			if (!order) return;
-			View.clearChat(query.from.id, bot);
-			const view = new OrderStatusView(query.from.id, bot, order);
-			view.invoke();
+			View.clearChat(query.from.id);
+			new OrderStatusView(query.from.id, bot, order).invoke();
 
 			break; 
 		}
 		case 'showMainMenu' : {
-			View.clearChat(query.from.id, bot);
-			new MainMenuView(query.from.id, bot).invoke();
+			View.clearChat(query.from.id);
+			new MainMenuView(query.from.id).invoke();
 
 			break;
 		}
 		case 'showAccount' : {
 			const user = await User.findOne({id: query.from.id}) ?? await new User(query.from).save();
 
-			View.clearChat(query.from.id, bot);
-			new AccountFormView(query.from.id, bot, user).invoke(); 
+			View.clearChat(query.from.id);
+			new AccountFormView(query.from.id, user).invoke();
 
 			break; 
 		}
@@ -102,8 +96,8 @@ bot.on('callback_query', async query => {
 
 			if(!query.message) return;
 
-			View.clearChat(query.from.id, bot);
-			new AccountFormView(query.from.id, bot, user).invoke();
+			let view = await View.findOne({message_id: query.message.message_id});
+			view?.refresh(new AccountFormView(query.from.id, user).text);
 
 			bot.answerCallbackQuery(query.id, {text: 'Phone number updated'});
 
@@ -119,8 +113,9 @@ bot.on('callback_query', async query => {
 
 			if(!query.message) return;
 
-			View.clearChat(query.from.id, bot);
-			new AccountFormView(query.from.id, bot, user).invoke();
+			let view = await View.findOne({message_id: query.message.message_id});
+			view?.refresh(new AccountFormView(query.from.id, user).text);
+
 			bot.answerCallbackQuery(query.id, {text: 'First name updated'});
 
 			break; 
@@ -135,9 +130,8 @@ bot.on('callback_query', async query => {
 
 			if(!query.message) return;
 
-			View.clearChat(query.from.id, bot);
-			new AccountFormView(query.from.id, bot, user).invoke();
-			bot.answerCallbackQuery(query.id, {text: 'Last name updated'});
+			let view = await View.findOne({message_id: query.message.message_id});
+			view?.refresh(new AccountFormView(query.from.id, user).text);
 
 			break; 
 		}

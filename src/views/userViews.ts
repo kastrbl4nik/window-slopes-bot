@@ -4,7 +4,7 @@ import { View } from "../models/view";
 
 export class AccountFormView extends View {
 
-    constructor(chatId: TelegramBot.ChatId, bot: TelegramBot, user: IUser) {
+    constructor(chatId: TelegramBot.ChatId, user: IUser) {
         const text = 
         '*Your Account*:\n\n' +
         '▫️ *First Name*: ' + (user.first_name ?? '🚫') + '\n' +
@@ -27,6 +27,6 @@ export class AccountFormView extends View {
                 ]]
             }
         }
-        super(chatId, bot, text, options);
+        super({chat_id: chatId, text: text, options: options});
     }
 }
