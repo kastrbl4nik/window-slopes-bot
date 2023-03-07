@@ -135,6 +135,14 @@ bot.on('callback_query', async query => {
 
 			break; 
 		}
+
+		case 'confirmOrder' : {
+			const order = await Order.findById({_id: request.orderId});
+			
+
+
+			// ...
+		}
 	}
 
 	bot.answerCallbackQuery(query.id);

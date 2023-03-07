@@ -7,9 +7,9 @@ export class OrderFormView extends View {
     constructor(chatId: TelegramBot.ChatId, order: IOrder) {
         const text = 
         '*Your order was created*\\!\n\n' +
-        '▫️ *Id*: \`'+ (order._id ?? '🚫') + '\`\n' +
+        '▫️ *Id*: \`'+ (order._id ?? '🚫') + '\`\n' /*+
         '▫️ *Width*: ' + (order.width ?? '🚫') + '\n' +
-        '▫️ *Height*: ' + (order.height ?? '🚫') + '\n';
+        '▫️ *Height*: ' + (order.height ?? '🚫') + '\n'*/;
         const options: TelegramBot.SendMessageOptions = {
             parse_mode: 'MarkdownV2',
             reply_markup: {
@@ -18,7 +18,7 @@ export class OrderFormView extends View {
                     {text: 'Height ✏️', callback_data: 'enterHeight'},
                 ],
                 [
-                    {text: 'Confirm ✅', callback_data: 'confirmOrder'},
+                    {text: 'Confirm ✅', callback_data: JSON.stringify({type: 'confirmOrder', orderId: order._id})},
                     {text: 'Cancel 🗑', callback_data: JSON.stringify({type: 'cancelOrder', orderId: order._id})},
                 ]]
             }
