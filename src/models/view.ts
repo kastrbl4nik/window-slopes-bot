@@ -1,57 +1,67 @@
-import { Schema, Types, model } from "mongoose";
-import TelegramBot from "node-telegram-bot-api";
+import { Model, Schema, Types, model } from "mongoose";
+import TelegramBot, { EditMessageTextOptions } from "node-telegram-bot-api";
+import bot from '../main';
 
 export interface IView {
     _id?: Types.ObjectId,
     message_id?: number,
+    text: string,
+    options: TelegramBot.SendMessageOptions,
     chat_id: TelegramBot.ChatId,
+}
+
+interface IViewMethods {
     invoke(): Promise<void>,
     destroy(): Promise<void>,
+    refresh(text: string): Promise<void>,
 }
 
-const viewSchema = new Schema<IView>({
+interface ViewModel extends Model<IView, {}, IViewMethods> {
+    clearChat(chatId: number): Promise<void>,
+};
+
+const viewSchema = new Schema<IView, ViewModel, IViewMethods>({
     message_id: {type: Number, required: false},
     chat_id: {type: Number, required: true},
+    text: {type: String, required: true},
+    options: {type: Schema.Types.Mixed, required: false},
 }, { versionKey: false })
 
-export const ViewModel = model<IView>('View', viewSchema);
+viewSchema.method('invoke', async function invoke() {
+    this.message_id = (await bot.sendMessage(this.chat_id, this.text, this.options)).message_id;
+    this.save();
+});
 
-export class View implements IView {
-    public message_id?: number;
-    constructor(
-        public chat_id: TelegramBot.ChatId,
-        public bot: TelegramBot,
-        public text: string,
-        public options: TelegramBot.SendMessageOptions,
-    ) {}
-
-    static getView(chatId: TelegramBot.ChatId, messageId: number) {
-        return ViewModel.findOne({chat_id: chatId, message_id: messageId});
+viewSchema.method('destroy', async function destroy() {
+    if(!this.message_id) return;
+    try {
+        await bot.deleteMessage(this.chat_id, this.message_id.toString());
+    } catch {
+        console.error("Message to delete not found");
     }
+    View.deleteOne({_id: this._id});
+})
 
-    static async clearChat(chatId: TelegramBot.ChatId, bot: TelegramBot) {
-        const viewsData = await ViewModel.find({chat_id: chatId});
-        for(const viewData of viewsData) {
-            const view = new View(viewData.chat_id, bot, '', {});
-            view.message_id = viewData.message_id;
-            view.destroy();
-        }
+viewSchema.method('refresh', async function refresh(text: string) {
+    const editOptions: EditMessageTextOptions = {
+        parse_mode: this.options.parse_mode,
+        chat_id: this.chat_id,
+        message_id: this.message_id,
+        reply_markup: this.options.reply_markup,
     }
+    try {
+        await bot.editMessageText(text, editOptions);
+    } catch {
+        console.error("Message to update not found");
+    }
+    this.update();
+})
 
-    public invoke = async () => {
-        this.message_id = (await this.bot.sendMessage(this.chat_id, this.text, this.options)).message_id;
-        const view = new ViewModel(this);
-        view.save();
-    }
+viewSchema.static('clearChat', async function clearChat(chatId: number) {
+    const views = await View.find({chat_id: chatId});
+    views.forEach(view => {
+        view.destroy();
+    });
+});
 
-    public destroy = async () => {
-        if(!this.message_id) return;
-        try {
-            await this.bot.deleteMessage(this.chat_id, this.message_id.toString());
-        } catch (e) {
-            console.error(e);
-        }
-        const view = await View.getView(this.chat_id, this.message_id);
-        view?.delete();
-    }
-}
+export const View = model<IView, ViewModel>('View', viewSchema);

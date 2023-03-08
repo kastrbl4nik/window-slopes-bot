@@ -4,13 +4,12 @@ import { User } from "../models/user";
 import { View } from "../models/view";
 
 export class OrderFormView extends View {
-    private order: IOrder;
-    constructor(chatId: TelegramBot.ChatId, bot: TelegramBot, order: IOrder) {
+    constructor(chatId: TelegramBot.ChatId, order: IOrder) {
         const text = 
         '*Your order was created*\\!\n\n' +
-        '▫️ *Id*: \`'+ (order._id ?? '🚫') + '\`\n' +
+        '▫️ *Id*: \`'+ (order._id ?? '🚫') + '\`\n' /*+
         '▫️ *Width*: ' + (order.width ?? '🚫') + '\n' +
-        '▫️ *Height*: ' + (order.height ?? '🚫') + '\n';
+        '▫️ *Height*: ' + (order.height ?? '🚫') + '\n'*/;
         const options: TelegramBot.SendMessageOptions = {
             parse_mode: 'MarkdownV2',
             reply_markup: {
@@ -19,18 +18,16 @@ export class OrderFormView extends View {
                     {text: 'Height ✏️', callback_data: 'enterHeight'},
                 ],
                 [
-                    {text: 'Confirm ✅', callback_data: 'confirmOrder'},
+                    {text: 'Confirm ✅', callback_data: JSON.stringify({type: 'confirmOrder', orderId: order._id})},
                     {text: 'Cancel 🗑', callback_data: JSON.stringify({type: 'cancelOrder', orderId: order._id})},
                 ]]
             }
         }
-        super(chatId, bot, text, options);
-        this.order = order;
+        super({chat_id: chatId, text: text, options: options});
     }
 }
 
 export class OrderStatusView extends View {
-    private order: IOrder;
     constructor(chatId: TelegramBot.ChatId, bot: TelegramBot, order: IOrder) {
         const text = 
         'Your last order status: '; // TODO: order status
@@ -41,7 +38,6 @@ export class OrderStatusView extends View {
                 ]]
             }
         }
-        super(chatId, bot, text, options);
-        this.order = order;
+        super({chat_id: chatId, text: text, options: options});
     }
 }
